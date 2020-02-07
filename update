@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm -f oui.txt
+
+wget http://standards-oui.ieee.org/oui.txt
+
+grep "base 16" oui.txt |dos2unix| cut -c1-6,22- > out.db

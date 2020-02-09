@@ -86,10 +86,12 @@ void find(char *mac, char *result, int len)
 	for (n = 0; n < OUILEN; n++) {
 		while (*p) {
 			if ((*p >= '0' && *p <= '9')
-			    || (*p >= 'a' && *p <= 'f')
 			    || (*p >= 'A' && *p <= 'F'))
 				break;
-			else {
+			else if (*p >= 'a' && *p <= 'f') {
+				*p = *p - 'a' + 'A';
+				break;
+			} else {
 				p++;
 				continue;
 			}
@@ -162,9 +164,9 @@ void respond(int cfd, char *mesg)
 		else {
 			find(p + 5, result, 128);
 			if (result[0])
-				len = snprintf(buf, MAXLEN, "%s%s\r\n", http_head, result);
+				len = snprintf(buf, MAXLEN, "%s%s", http_head, result);
 			else
-				len = snprintf(buf, MAXLEN, "%sNULL\r\n", http_head);
+				len = snprintf(buf, MAXLEN, "%s未知", http_head);
 		}
 	}
 

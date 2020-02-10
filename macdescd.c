@@ -65,6 +65,8 @@ static inline struct oui_struct *hash_find(char *oui)
 {
 	struct oui_struct *s;
 	unsigned int k = hash_key(oui);
+	if (debug >= 2)
+		printf("hash_find %s\n", oui);
 	s = ouies[k];
 	while (s) {
 		if (strcmp(s->oui, oui) == 0)
@@ -79,12 +81,12 @@ void find(char *mac, char *result, int len)
 	char oui[OUILEN + 1];
 	oui[0] = 0;
 	if (debug >= 2)
-		printf("find: %s\n", oui);
+		printf("find: %s\n", mac);
 	char *p;
 	p = mac;
 	int n;
 	for (n = 0; n < OUILEN; n++) {
-		while (*p) {
+		while (*p && (*p != ' ')) {
 			if ((*p >= '0' && *p <= '9')
 			    || (*p >= 'A' && *p <= 'F'))
 				break;
@@ -96,6 +98,8 @@ void find(char *mac, char *result, int len)
 				continue;
 			}
 		}
+		if ((*p) == ' ')
+			break;
 		oui[n] = *p;
 		if ((*p) == 0)
 			break;
@@ -108,7 +112,9 @@ void find(char *mac, char *result, int len)
 	struct oui_struct *s;
 	s = hash_find(oui);
 	if (s)
-		strcpy(result, s->org);
+		strncpy(result, s->org, len);
+	if (debug >= 2)
+		printf("result %s\n", result);
 	return;
 }
 
@@ -151,7 +157,7 @@ void load_oui(char *filename)
 void respond(int cfd, char *mesg)
 {
 	char buf[MAXLEN], *p = mesg;
-	char result[128];
+	char result[MAXLEN];
 	int len = 0;
 
 	if (debug >= 2)

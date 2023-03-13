@@ -2,6 +2,10 @@
 
 rm -f oui.txt
 
-wget http://standards-oui.ieee.org/oui.txt
+mv oui.db oui.db.old
 
-grep "base 16" oui.txt |dos2unix| cut -c1-6,22- > out.db
+wget https://standards-oui.ieee.org/oui/oui.txt
+
+grep "base 16" oui.txt |dos2unix| cut -c1-6,22- |sort > oui.db
+
+diff -u oui.db.old oui.db | more

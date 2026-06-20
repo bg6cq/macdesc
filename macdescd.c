@@ -142,7 +142,7 @@ void load_oui(char *filename)
 		s = malloc(sizeof(*s));
 		if (s == NULL)
 			continue;
-		s->org = malloc(strlen(p));
+		s->org = malloc(strlen(p) + 1);
 		if (s->org == NULL) {
 			free(s);
 			continue;

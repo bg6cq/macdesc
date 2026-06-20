@@ -290,6 +290,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'o':
 			strncpy(ouidbfilename, optarg, MAXLEN - 1);
+			ouidbfilename[MAXLEN - 1] = 0;
 			break;
 		case 'f':
 			fork_and_do = 1;

@@ -139,7 +139,7 @@ void load_oui(char *filename)
 		*p = 0;
 		p++;
 		struct oui_struct *s;
-		s = malloc(sizeof(s));
+		s = malloc(sizeof(*s));
 		if (s == NULL)
 			continue;
 		s->org = malloc(strlen(p));

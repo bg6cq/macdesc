@@ -375,7 +375,11 @@ int main(int argc, char *argv[])
 							infd = accept(listenfd, NULL, 0);
 							if (infd == -1) {
 								if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {	/*  all incoming connections processed. */
-									idle_fd = open("/dev/null", O_RDONLY);
+									{
+										int new_idle = open("/dev/null", O_RDONLY);
+										if (new_idle >= 0)
+											idle_fd = new_idle;
+									}
 									break;
 								} else {
 									perror("error: sencond accept");
@@ -383,7 +387,11 @@ int main(int argc, char *argv[])
 								}
 							}
 							close(infd);
-							idle_fd = open("/dev/null", O_RDONLY);
+							{
+								int new_idle = open("/dev/null", O_RDONLY);
+								if (new_idle >= 0)
+									idle_fd = new_idle;
+							}
 							continue;
 						} else {
 							perror("error: accept new client");

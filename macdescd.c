@@ -111,8 +111,10 @@ void find(char *mac, char *result, int len)
 		return;
 	struct oui_struct *s;
 	s = hash_find(oui);
-	if (s)
+	if (s) {
 		strncpy(result, s->org, len);
+		result[len - 1] = 0;
+	}
 	if (debug >= 2)
 		printf("result %s\n", result);
 	return;

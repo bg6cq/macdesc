@@ -180,7 +180,15 @@ void respond(int cfd, char *mesg)
 
 	if (debug >= 2)
 		printf("Send to Client(fd %d):\n%s##END\n", cfd, buf);
-	write(cfd, buf, len);
+	{
+		int total = 0;
+		while (total < len) {
+			int n = write(cfd, buf + total, len - total);
+			if (n <= 0)
+				break;
+			total += n;
+		}
+	}
 }
 
 int set_socket_non_blocking(int fd)

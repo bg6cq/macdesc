@@ -309,6 +309,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
+	(void)signal(SIGPIPE, SIG_IGN);
 	(void)signal(SIGHUP, SIG_IGN);
 	setvbuf(stdout, NULL, _IONBF, 0);
 

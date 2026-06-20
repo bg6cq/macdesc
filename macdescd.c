@@ -111,8 +111,10 @@ void find(char *mac, char *result, int len)
 		return;
 	struct oui_struct *s;
 	s = hash_find(oui);
-	if (s)
+	if (s) {
 		strncpy(result, s->org, len);
+		result[len - 1] = 0;
+	}
 	if (debug >= 2)
 		printf("result %s\n", result);
 	return;
@@ -139,10 +141,10 @@ void load_oui(char *filename)
 		*p = 0;
 		p++;
 		struct oui_struct *s;
-		s = malloc(sizeof(s));
+		s = malloc(sizeof(*s));
 		if (s == NULL)
 			continue;
-		s->org = malloc(strlen(p));
+		s->org = malloc(strlen(p) + 1);
 		if (s->org == NULL) {
 			free(s);
 			continue;
@@ -178,7 +180,15 @@ void respond(int cfd, char *mesg)
 
 	if (debug >= 2)
 		printf("Send to Client(fd %d):\n%s##END\n", cfd, buf);
-	write(cfd, buf, len);
+	{
+		int total = 0;
+		while (total < len) {
+			int n = write(cfd, buf + total, len - total);
+			if (n <= 0)
+				break;
+			total += n;
+		}
+	}
 }
 
 int set_socket_non_blocking(int fd)
@@ -280,6 +290,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'o':
 			strncpy(ouidbfilename, optarg, MAXLEN - 1);
+			ouidbfilename[MAXLEN - 1] = 0;
 			break;
 		case 'f':
 			fork_and_do = 1;
@@ -298,7 +309,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	(void)signal(SIGCLD, SIG_IGN);
+	(void)signal(SIGPIPE, SIG_IGN);
 	(void)signal(SIGHUP, SIG_IGN);
 	setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -374,7 +385,11 @@ int main(int argc, char *argv[])
 							infd = accept(listenfd, NULL, 0);
 							if (infd == -1) {
 								if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {	/*  all incoming connections processed. */
-									idle_fd = open("/dev/null", O_RDONLY);
+									{
+										int new_idle = open("/dev/null", O_RDONLY);
+										if (new_idle >= 0)
+											idle_fd = new_idle;
+									}
 									break;
 								} else {
 									perror("error: sencond accept");
@@ -382,7 +397,11 @@ int main(int argc, char *argv[])
 								}
 							}
 							close(infd);
-							idle_fd = open("/dev/null", O_RDONLY);
+							{
+								int new_idle = open("/dev/null", O_RDONLY);
+								if (new_idle >= 0)
+									idle_fd = new_idle;
+							}
 							continue;
 						} else {
 							perror("error: accept new client");
